@@ -5,16 +5,16 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import store from "./client/store";
+// import store from "./client/store";
 
 ReactDOM.render(
-	<Provider store={store}>
+	// <Provider store={store}>
 		<BrowserRouter>
 			<React.StrictMode>
 				<App />
 			</React.StrictMode>
-		</BrowserRouter>
-	</Provider>,
+		</BrowserRouter>,
+	// </Provider>,
 	document.getElementById("root")
 );
 

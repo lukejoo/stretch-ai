@@ -1,0 +1,23 @@
+video {
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  text-align: center;
+  transform: rotateY(180deg);
+  width: 640;
+  height: 480;
+}
+
+canvas {
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  text-align: center;
+  transform: rotateY(180deg);
+  width: 640;
+  height: 480;
+}
