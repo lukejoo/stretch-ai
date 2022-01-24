@@ -2,12 +2,12 @@
 import { Button, ButtonGroup } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
-import "./Main.css";
+import "./TrainModel.css";
 import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./drawPose";
 
 const PREDICTION_CONFIDENCE = 0.85;
 
-const Main = () => {
+const TrainModel = () => {
 	const webcamRef = useRef(null);
 	const canvasRef = useRef(null);
 
@@ -180,12 +180,12 @@ const Main = () => {
 	};
 
 	return (
-		<div className="Main">
-			<header className="Main-header">
-				<h1>Main</h1>
+		<div className="TrainModel">
+			<header className="TrainModel-header">
+				<h1>TrainModel</h1>
 				<Webcam ref={webcamRef} width={640} height={480} />
 				<canvas ref={canvasRef} width={640} height={480} />
-				<div className="Main-buttons">
+				<div className="TrainModel-buttons">
 					<ButtonGroup color="primary" variant="contained">
 						<Button name="front" onClick={buttonClick}>
 							Front
@@ -223,4 +223,4 @@ const Main = () => {
 	);
 };
 
-export default Main;
+export default TrainModel;
