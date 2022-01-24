@@ -5,7 +5,11 @@ import Webcam from "react-webcam";
 import "./TrainModel.css";
 import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./drawPose";
 
-const PREDICTION_CONFIDENCE = 0.85;
+const DELAY_TIME = 2000;
+const TRAIN_TIME = 5000;
+const EYE_DISTANCE = 55;
+const KEYPOINT_SCORE = 0.7;
+const PREDICTION_CONFIDENCE = 0.7;
 
 const TrainModel = () => {
 	const webcamRef = useRef(null);
@@ -34,15 +38,14 @@ const TrainModel = () => {
 
 	useEffect(() => {
 		if (brain && poses.length > 0 && state === "collecting" && targetLabel) {
-			const pose = poses[0].pose;
-			const skeleton = poses[0].skeleton;
+			const keypoints = poses[0].pose.keypoints;
 			let inputs = [];
-			for (let i = 0; i < pose.keypoints.length; i++) {
-				let x = pose.keypoints[i].position.x;
-				let y = pose.keypoints[i].position.y;
+			keypoints.forEach((keypoint) => {
+				let x = keypoint.position.x;
+				let y = keypoint.position.y;
 				inputs.push(x);
 				inputs.push(y);
-			}
+			});
 			brain.addData(inputs, [targetLabel]);
 		}
 	}, [brain, poses, state, targetLabel]);
@@ -123,12 +126,16 @@ const TrainModel = () => {
 		console.log("🧑🏻‍💻 Neural Network Training Finished!");
 	}
 
-	const getEyeDistance = () => {
-    const pose = poses[0].pose;
-    const eyeR = pose.rightEye;
-    const eyeL = pose.leftEye;
-		return Math.sqrt((eyeR.x - eyeL.x) ** 2 + (eyeR.y - eyeL.y) ** 2);
+	function brainLoaded() {
+		console.log("🧑🏻‍💻 brain loaded!");
 	}
+
+	const getEyeDistance = () => {
+		const pose = poses[0].pose;
+		const eyeR = pose.rightEye;
+		const eyeL = pose.leftEye;
+		return Math.sqrt((eyeR.x - eyeL.x) ** 2 + (eyeR.y - eyeL.y) ** 2);
+	};
 
 	const buttonClick = (e) => {
 		e.preventDefault();
@@ -139,12 +146,25 @@ const TrainModel = () => {
 				else console.log("🧑🏻‍💻 Begin Classification");
 				setClassify(!classify);
 				break;
-			case "load":
+			case "loadData":
 				if (brain) {
-					console.log("🧑🏻‍💻 Loading brain...");
+					console.log("🧑🏻‍💻 Loading data...");
 					brain.loadData("data.json", () => {
 						dataReady();
 					});
+				} else {
+					console.log("🧑🏻‍💻 brain not ready!");
+				}
+				break;
+			case "loadModel":
+				if (brain) {
+					console.log("🧑🏻‍💻 Loading model...");
+					const modelInfo = {
+						model: "model.json",
+						metadata: "model_meta.json",
+						weights: "model.weights.bin",
+					};
+					brain.load(modelInfo, brainLoaded);
 				} else {
 					console.log("🧑🏻‍💻 brain not ready!");
 				}
@@ -153,43 +173,40 @@ const TrainModel = () => {
 				brain.save();
 				break;
 			case "saveData":
-				brain.saveData();
+				brain.saveData("data");
 				break;
 			case "train":
 				console.log("🧑🏻‍💻 Training brain...");
 				brain.normalizeData();
 				brain.train({ epochs: 50 }, finished);
 				break;
-			default: // train pose
-        const distance = getEyeDistance();
-        if (distance > 50) {
-          console.log('🧑🏻‍💻 Too close to the camera!', distance);
-        } else {
-          setTimeout(function () {
-            console.log("collecting");
-            setState("collecting");
-            setTargetLabel(action);
-            setTimeout(function () {
-              console.log("not collecting");
-              setState("waiting");
-              setTargetLabel("");
-            }, 10000);
-          }, 1000);
-        }
+			default:
+				// train pose
+				const distance = getEyeDistance();
+				if (distance > EYE_DISTANCE) {
+					console.log("🧑🏻‍💻 Too close to the camera!", distance);
+				} else {
+					console.log("🧑🏻‍💻 Training for:", action);
+					setTimeout(() => {
+						console.log("collecting");
+						setState("collecting");
+						setTargetLabel(action);
+						setTimeout(function () {
+							console.log("not collecting");
+							setState("waiting");
+							setTargetLabel("");
+						}, TRAIN_TIME);
+					}, DELAY_TIME);
+				}
 		}
 	};
 
 	return (
 		<div className="TrainModel">
-			<header className="TrainModel-header">
-				<h1>TrainModel</h1>
-				<Webcam ref={webcamRef} width={640} height={480} />
-				<canvas ref={canvasRef} width={640} height={480} />
+			<h1>TrainModel</h1>
+			<div className="TrainModel-parent">
 				<div className="TrainModel-buttons">
 					<ButtonGroup color="primary" variant="contained">
-						<Button name="front" onClick={buttonClick}>
-							Front
-						</Button>
 						<Button name="up" onClick={buttonClick}>
 							Up
 						</Button>
@@ -198,6 +215,9 @@ const TrainModel = () => {
 						</Button>
 						<Button name="right" onClick={buttonClick}>
 							Right
+						</Button>
+						<Button name="idle" onClick={buttonClick}>
+							Idle
 						</Button>
 						<Button name="saveData" onClick={buttonClick}>
 							Save Data
@@ -210,15 +230,24 @@ const TrainModel = () => {
 						</Button>
 					</ButtonGroup>
 					<ButtonGroup color="secondary" variant="contained">
-						<Button name="load" onClick={buttonClick}>
-							Load
+						<Button name="loadData" onClick={buttonClick}>
+							Load Data
+						</Button>
+						<Button name="loadModel" onClick={buttonClick}>
+							Load Model
 						</Button>
 						<Button name="classify" onClick={buttonClick}>
 							Classify
 						</Button>
 					</ButtonGroup>
 				</div>
-			</header>
+				{/* <h2>Distance: {poses && poses[0] && getEyeDistance()}</h2> */}
+				<div className="webcam">
+					<Webcam ref={webcamRef} width={640} height={480} />
+					<canvas ref={canvasRef} width={640} height={480} />
+				</div>
+			</div>
+			<footer></footer>
 		</div>
 	);
 };

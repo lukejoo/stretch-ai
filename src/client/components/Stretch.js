@@ -4,7 +4,7 @@ import Webcam from "react-webcam";
 import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./drawPose";
 import "./Stretch.css";
 
-const EYE_DISTANCE = 40
+const EYE_DISTANCE = 50;
 const PREDICTION_CONFIDENCE = 0.85;
 
 const Stretch = () => {
@@ -76,7 +76,7 @@ const Stretch = () => {
 			},
 			() => {
 				console.log("🧑🏻‍💻 Neural Network Training Finished!");
-        setClassify(true);
+				setClassify(true);
 			}
 		);
 	};
@@ -88,33 +88,31 @@ const Stretch = () => {
 		return Math.sqrt((eyeR.x - eyeL.x) ** 2 + (eyeR.y - eyeL.y) ** 2);
 	};
 
-  const gotResult = (error, results) => {
+	const gotResult = (error, results) => {
 		if (results && results[0].confidence > PREDICTION_CONFIDENCE) {
 			const poseLabel = results[0].label.toUpperCase();
-			console.log("🧑🏻‍💻 poseLabel", poseLabel);
 		}
 	};
 
 	if (!brain) setupNN();
 
 	if (classify) {
-    const distance = getEyeDistance();
-    console.log('🧑🏻‍💻 distance', distance);
-    if (distance > EYE_DISTANCE) {
-      console.log('🧑🏻‍💻 too close to camera!');
-    } else {
-      const pose = poses[0].pose;
-      if (pose) {
-        let inputs = [];
-        for (let i = 0; i < pose.keypoints.length; i++) {
-          let x = pose.keypoints[i].position.x;
-          let y = pose.keypoints[i].position.y;
-          inputs.push(x);
-          inputs.push(y);
-        }
-        brain.classify(inputs, gotResult);
-      }
-    }
+		const distance = getEyeDistance();
+		if (distance > EYE_DISTANCE) {
+			console.log("🧑🏻‍💻 too close to camera!");
+		} else {
+			const pose = poses[0].pose;
+			if (pose) {
+				let inputs = [];
+				for (let i = 0; i < pose.keypoints.length; i++) {
+					let x = pose.keypoints[i].position.x;
+					let y = pose.keypoints[i].position.y;
+					inputs.push(x);
+					inputs.push(y);
+				}
+				brain.classify(inputs, gotResult);
+			}
+		}
 	}
 
 	return (

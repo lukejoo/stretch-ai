@@ -8,8 +8,8 @@ function App() {
 	return (
 		<div className="App">
 			<Routes>
-        <Route path="/" element={<Stretch />} />
-				<Route path="/trainmodel" element={<TrainModel />} />
+        <Route path="/stretch" element={<Stretch />} />
+				<Route path="/" element={<TrainModel />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</div>
