@@ -10,6 +10,11 @@ const TRAIN_TIME = 5000;
 const EYE_DISTANCE = 55;
 const KEYPOINT_SCORE = 0.7;
 const PREDICTION_CONFIDENCE = 0.7;
+const TARGET_POSE = "UP";
+
+let intervalID;
+let gotMatch = false;
+let matchTime = 0;
 
 const TrainModel = () => {
 	const webcamRef = useRef(null);
@@ -23,7 +28,7 @@ const TrainModel = () => {
 	const [brain, setBrain] = useState(null);
 	const [state, setState] = useState("waiting");
 	const [targetLabel, setTargetLabel] = useState("");
-	const [classify, setClassify] = useState(false);
+	const [beginClassify, setBeginClassify] = useState(false);
 
 	useEffect(() => {
 		if (webcamRef.current) setVideo(webcamRef.current.video);
@@ -89,7 +94,7 @@ const TrainModel = () => {
 
 	if (!brain) setupNN();
 
-	if (classify) {
+	const classify = () => {
 		const pose = poses[0].pose;
 		if (pose) {
 			let inputs = [];
@@ -101,14 +106,39 @@ const TrainModel = () => {
 			}
 			brain.classify(inputs, gotResult);
 		}
-	}
+	};
 
-	function gotResult(error, results) {
+	const gotResult = (error, results) => {
 		if (results && results[0].confidence > PREDICTION_CONFIDENCE) {
 			const poseLabel = results[0].label.toUpperCase();
 			console.log("🧑🏻‍💻 poseLabel", poseLabel);
+			if (poseLabel === TARGET_POSE) {
+				if (!gotMatch) {
+					gotMatch = true;
+					intervalID = setInterval(startTimer, 10);
+				}
+				if (matchTime === 10000) {
+          console.log('🧑🏻‍💻 reached 10000!', );
+					clearInterval(intervalID);
+					intervalID = null;
+					gotMatch = false;
+          matchTime = 0;
+				}
+			} else {
+				gotMatch = false;
+				if (intervalID) {
+					clearInterval(intervalID);
+					intervalID = null;
+				}
+			}
 		}
-	}
+	};
+
+	const startTimer = () => {
+    matchTime += 10;
+	};
+
+	if (beginClassify) classify();
 
 	const dataReady = () => {
 		brain.normalizeData();
@@ -123,11 +153,7 @@ const TrainModel = () => {
 	};
 
 	function finished() {
-		console.log("🧑🏻‍💻 Neural Network Training Finished!");
-	}
-
-	function brainLoaded() {
-		console.log("🧑🏻‍💻 brain loaded!");
+		console.log("🧑🏻‍💻 Training Finished!");
 	}
 
 	const getEyeDistance = () => {
@@ -142,9 +168,13 @@ const TrainModel = () => {
 		const action = e.target.name;
 		switch (action) {
 			case "classify":
-				if (classify) console.log("🧑🏻‍💻 Stop Classification");
-				else console.log("🧑🏻‍💻 Begin Classification");
-				setClassify(!classify);
+				if (brain && !brain.neuralNetwork.isTrained) {
+					console.log("🧑🏻‍💻 Brain not trained yet!");
+				} else {
+					if (classify) console.log("🧑🏻‍💻 Stop Classification");
+					else console.log("🧑🏻‍💻 Begin Classification");
+					setBeginClassify(!beginClassify);
+				}
 				break;
 			case "loadData":
 				if (brain) {
@@ -164,7 +194,9 @@ const TrainModel = () => {
 						metadata: "model_meta.json",
 						weights: "model.weights.bin",
 					};
-					brain.load(modelInfo, brainLoaded);
+					brain.load(modelInfo, () => {
+						console.log("🧑🏻‍💻 brain loaded!");
+					});
 				} else {
 					console.log("🧑🏻‍💻 brain not ready!");
 				}
@@ -241,6 +273,7 @@ const TrainModel = () => {
 						</Button>
 					</ButtonGroup>
 				</div>
+				{beginClassify && <h3>Time: {matchTime}</h3>}
 				{/* <h2>Distance: {poses && poses[0] && getEyeDistance()}</h2> */}
 				<div className="webcam">
 					<Webcam ref={webcamRef} width={640} height={480} />
