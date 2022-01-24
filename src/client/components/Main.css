@@ -1,23 +1,31 @@
-video {
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  position: absolute;
-  text-align: center;
-  transform: rotateY(180deg);
-  width: 640;
-  height: 480;
+.Main-webcam {
+  position: relative;
+}
+
+.Main-buttons {
+  position: relative;
 }
 
 canvas {
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  position: absolute;
-  text-align: center;
-  transform: rotateY(180deg);
-  width: 640;
-  height: 480;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	position: absolute;
+	text-align: center;
+	/* transform: rotateY(180deg); */
+	width: 640;
+	height: 480;
+}
+
+video {
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	position: absolute;
+	text-align: center;
+	/* transform: rotateY(180deg); */
+	width: 640;
+	height: 480;
 }

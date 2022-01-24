@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
     "@mediapipe/pose": "^0.4.1633558788",
+    "@mui/icons-material": "^5.3.0",
+    "@mui/material": "^5.3.0",
     "@tensorflow-models/pose-detection": "^0.0.6",
     "@tensorflow/tfjs": "^3.13.0",
     "@tensorflow/tfjs-backend-webgl": "^3.13.0",
