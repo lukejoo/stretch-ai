@@ -32,7 +32,6 @@ const poseEmoji = {
 let beginClicked = false;
 let brain;
 let currentPose = "";
-let stretchComplete = false;
 let poseIsMatched = {};
 let poseIntervalID = {};
 let poseTime = {
@@ -51,6 +50,7 @@ const Stretch = () => {
 	const [ctx, setCtx] = useState(null);
 	const [modelLoaded, setModelLoaded] = useState(false);
 	const [poses, setPoses] = useState([]);
+  const [stretchComplete, setStretchComplete] = useState(false);
 
 	useEffect(() => {
 		if (webcamRef.current) setVideo(webcamRef.current.video);
@@ -140,7 +140,7 @@ const Stretch = () => {
 				delete poseIntervalID[currentPose];
 			}
 			if (Object.values(poseTime).every((time) => time === STRETCH_TIME))
-				stretchComplete = true;
+				setStretchComplete(true);
 		}
 	};
 
@@ -162,7 +162,7 @@ const Stretch = () => {
 				break;
 			case "reset":
 				beginClicked = false;
-        stretchComplete = false;
+        setStretchComplete(false);
 				poseTime = {
 					LEFT: 0,
 					RIGHT: 0,
