@@ -55,7 +55,7 @@ const Train = () => {
 		}
 	}, [brain, poses, state, targetLabel]);
 
-	//// POSENET ////
+	//// POSENET //
 
 	// eslint-disable-next-line no-undef
 	const setupPoseNet = () => {
