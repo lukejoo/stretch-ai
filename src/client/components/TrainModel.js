@@ -7,14 +7,18 @@ import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./drawPose";
 
 const DELAY_TIME = 2000;
 const TRAIN_TIME = 5000;
-const EYE_DISTANCE = 55;
-const KEYPOINT_SCORE = 0.7;
+const MAX_EYE_DISTANCE = 80;
 const PREDICTION_CONFIDENCE = 0.7;
-const TARGET_POSE = "UP";
 
-let intervalID;
-let gotMatch = false;
-let matchTime = 0;
+let currentPose = "";
+let poseIsMatched = {};
+let poseIntervalID = {};
+let poseTime = {
+  LEFT: 0,
+  RIGHT: 0,
+  UP: 0,
+  IDLE: 0,
+};
 
 const TrainModel = () => {
 	const webcamRef = useRef(null);
@@ -110,32 +114,20 @@ const TrainModel = () => {
 
 	const gotResult = (error, results) => {
 		if (results && results[0].confidence > PREDICTION_CONFIDENCE) {
-			const poseLabel = results[0].label.toUpperCase();
-			console.log("🧑🏻‍💻 poseLabel", poseLabel);
-			if (poseLabel === TARGET_POSE) {
-				if (!gotMatch) {
-					gotMatch = true;
-					intervalID = setInterval(startTimer, 10);
-				}
-				if (matchTime === 10000) {
-          console.log('🧑🏻‍💻 reached 10000!', );
-					clearInterval(intervalID);
-					intervalID = null;
-					gotMatch = false;
-          matchTime = 0;
-				}
-			} else {
-				gotMatch = false;
-				if (intervalID) {
-					clearInterval(intervalID);
-					intervalID = null;
-				}
+			currentPose = results[0].label.toUpperCase();
+			if (!poseIsMatched[currentPose]) {
+				poseIsMatched[currentPose] = true;
+        poseTime[currentPose] = 0;
+				poseIntervalID[currentPose] = setInterval(() => {
+          poseTime[currentPose] += 10;
+				}, 10);
+			}
+			if (poseTime[currentPose] >= 10000 && poseIntervalID[currentPose]) {
+				console.log("🧑🏻‍💻 reached 10000!");
+				clearInterval(poseIntervalID[currentPose]);
+				poseIntervalID[currentPose] = null;
 			}
 		}
-	};
-
-	const startTimer = () => {
-    matchTime += 10;
 	};
 
 	if (beginClassify) classify();
@@ -171,8 +163,8 @@ const TrainModel = () => {
 				if (brain && !brain.neuralNetwork.isTrained) {
 					console.log("🧑🏻‍💻 Brain not trained yet!");
 				} else {
-					if (classify) console.log("🧑🏻‍💻 Stop Classification");
-					else console.log("🧑🏻‍💻 Begin Classification");
+					if (!beginClassify) console.log("🧑🏻‍💻 Begin Classification");
+					else console.log("🧑🏻‍💻 Stop Classification");
 					setBeginClassify(!beginClassify);
 				}
 				break;
@@ -215,7 +207,7 @@ const TrainModel = () => {
 			default:
 				// train pose
 				const distance = getEyeDistance();
-				if (distance > EYE_DISTANCE) {
+				if (distance > MAX_EYE_DISTANCE) {
 					console.log("🧑🏻‍💻 Too close to the camera!", distance);
 				} else {
 					console.log("🧑🏻‍💻 Training for:", action);
@@ -273,7 +265,12 @@ const TrainModel = () => {
 						</Button>
 					</ButtonGroup>
 				</div>
-				{beginClassify && <h3>Time: {matchTime}</h3>}
+				<h3>Pose: {currentPose}</h3>
+				{beginClassify && (
+					<h4>
+						Left: {poseTime.LEFT}, Right: {poseTime.RIGHT}, Up: {poseTime.UP}, Idle: {poseTime.IDLE}
+					</h4>
+				)}
 				{/* <h2>Distance: {poses && poses[0] && getEyeDistance()}</h2> */}
 				<div className="webcam">
 					<Webcam ref={webcamRef} width={640} height={480} />
