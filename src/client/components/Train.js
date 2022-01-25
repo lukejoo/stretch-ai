@@ -2,13 +2,9 @@
 import { Button, ButtonGroup } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
-import "./TrainModel.css";
-import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./drawPose";
-
-const DELAY_TIME = 2000;
-const TRAIN_TIME = 5000;
-const MAX_EYE_DISTANCE = 80;
-const PREDICTION_CONFIDENCE = 0.7;
+import "./Train.css";
+import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./utilities/drawPose";
+import { DELAY_TIME, MAX_EYE_DISTANCE, PREDICTION_CONFIDENCE, TRAIN_TIME } from "./utilities/constValues";
 
 let currentPose = "";
 let poseIsMatched = {};
@@ -20,7 +16,7 @@ let poseTime = {
   IDLE: 0,
 };
 
-const TrainModel = () => {
+const Train = () => {
 	const webcamRef = useRef(null);
 	const canvasRef = useRef(null);
 
@@ -226,10 +222,10 @@ const TrainModel = () => {
 	};
 
 	return (
-		<div className="TrainModel">
-			<h1>TrainModel</h1>
-			<div className="TrainModel-parent">
-				<div className="TrainModel-buttons">
+		<div className="Train">
+			<h1>Train</h1>
+			<div className="Train-parent">
+				<div className="Train-buttons">
 					<ButtonGroup color="primary" variant="contained">
 						<Button name="up" onClick={buttonClick}>
 							Up
@@ -282,4 +278,4 @@ const TrainModel = () => {
 	);
 };
 
-export default TrainModel;
+export default Train;

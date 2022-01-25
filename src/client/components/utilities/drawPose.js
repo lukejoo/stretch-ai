@@ -1,4 +1,4 @@
-const KEYPOINT_SCORE = 0.7;
+const KEYPOINT_SCORE = 0.75;
 
 export const drawCameraIntoCanvas = (ctx, video) => {
   ctx.drawImage(video, 0, 0, 640, 480);
