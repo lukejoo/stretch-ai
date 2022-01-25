@@ -17,7 +17,7 @@ import "./App.css";
 import Footer from "./client/components/Footer"
 import NotFound from "./client/components/NotFound";
 import Stretch from "./client/components/Stretch";
-import Train from "./client/components/Train";
+// import Train from "./client/components/Train";
 
 const logo = "Stretch.AI"
 const pages = ["Stretch", "Train"];
@@ -114,7 +114,7 @@ const App = () => {
 			<Routes>
 				<Route path="/" element={<Stretch />} />
         <Route path="/stretch" element={<Stretch />} />
-				<Route path="/train" element={<Train />} />
+				{/* <Route path="/train" element={<Train />} /> */}
 				<Route path="*" element={<NotFound />} />
 			</Routes>
       <Footer />
