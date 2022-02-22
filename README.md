@@ -7,7 +7,7 @@
 
 > Stretch.AI is a web app which uses machine learning to detect a user's body and times how long the user holds a certain pose. It's aim is to help users stretch their bodies out enough to ensure a healthy work station.
 
-### 💁‍♂️ [Demo](https://stretch-ai.herokuapp.com/)
+### 💁‍♂️ [Demo](https://stretchai.netlify.app)
 
 ## Install
 
