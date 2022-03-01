@@ -256,7 +256,11 @@ const Train = () => {
 					>
 						Train
 					</Typography>
-					<ButtonGroup color="primary" variant="contained">
+					<ButtonGroup
+						className="primary-buttons"
+						color="primary"
+						variant="contained"
+					>
 						<Button name="up" onClick={buttonClick}>
 							Up
 						</Button>
