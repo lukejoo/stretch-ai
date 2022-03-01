@@ -50,7 +50,7 @@ const Stretch = () => {
 	const [ctx, setCtx] = useState(null);
 	const [modelLoaded, setModelLoaded] = useState(false);
 	const [poses, setPoses] = useState([]);
-  const [stretchComplete, setStretchComplete] = useState(false);
+	const [stretchComplete, setStretchComplete] = useState(false);
 
 	useEffect(() => {
 		if (webcamRef.current) setVideo(webcamRef.current.video);
@@ -162,7 +162,7 @@ const Stretch = () => {
 				break;
 			case "reset":
 				beginClicked = false;
-        setStretchComplete(false);
+				setStretchComplete(false);
 				poseTime = {
 					LEFT: 0,
 					RIGHT: 0,
@@ -174,7 +174,7 @@ const Stretch = () => {
 	};
 
 	return (
-		<div className="TrainModel">
+		<div className="Stretch">
 			<Box
 				sx={{
 					bgcolor: "background.paper",

@@ -1,19 +1,35 @@
 /* eslint-disable no-undef */
-import { Button, ButtonGroup } from "@mui/material";
+import {
+	Box,
+	Button,
+	ButtonGroup,
+	Container,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import "./Train.css";
-import { drawCameraIntoCanvas, drawKeypoints, drawSkeleton } from "./utilities/drawPose";
-import { DELAY_TIME, MAX_EYE_DISTANCE, PREDICTION_CONFIDENCE, TRAIN_TIME } from "./utilities/constValues";
+import {
+	drawCameraIntoCanvas,
+	drawKeypoints,
+	drawSkeleton,
+} from "./utilities/drawPose";
+import {
+	DELAY_TIME,
+	MAX_EYE_DISTANCE,
+	PREDICTION_CONFIDENCE,
+	TRAIN_TIME,
+} from "./utilities/constValues";
 
 let currentPose = "";
 let poseIsMatched = {};
 let poseIntervalID = {};
 let poseTime = {
-  LEFT: 0,
-  RIGHT: 0,
-  UP: 0,
-  IDLE: 0,
+	LEFT: 0,
+	RIGHT: 0,
+	UP: 0,
+	IDLE: 0,
 };
 
 const Train = () => {
@@ -113,9 +129,9 @@ const Train = () => {
 			currentPose = results[0].label.toUpperCase();
 			if (!poseIsMatched[currentPose]) {
 				poseIsMatched[currentPose] = true;
-        poseTime[currentPose] = 0;
+				poseTime[currentPose] = 0;
 				poseIntervalID[currentPose] = setInterval(() => {
-          poseTime[currentPose] += 10;
+					poseTime[currentPose] += 10;
 				}, 10);
 			}
 			if (poseTime[currentPose] >= 10000 && poseIntervalID[currentPose]) {
@@ -211,7 +227,7 @@ const Train = () => {
 						console.log("collecting");
 						setState("collecting");
 						setTargetLabel(action);
-						setTimeout(function () {
+						setTimeout(function() {
 							console.log("not collecting");
 							setState("waiting");
 							setTargetLabel("");
@@ -223,9 +239,23 @@ const Train = () => {
 
 	return (
 		<div className="Train">
-			<h1>Train</h1>
-			<div className="Train-parent">
-				<div className="Train-buttons">
+			<Box
+				sx={{
+					bgcolor: "Background.paper",
+					pt: 4,
+					pb: 4,
+				}}
+			>
+				<Container maxWidth="sm">
+					<Typography
+						component="h1"
+						variant="h2"
+						align="center"
+						color="GrayText.primary"
+						gutterBottom
+					>
+						Train
+					</Typography>
 					<ButtonGroup color="primary" variant="contained">
 						<Button name="up" onClick={buttonClick}>
 							Up
@@ -260,20 +290,12 @@ const Train = () => {
 							Classify
 						</Button>
 					</ButtonGroup>
-				</div>
-				<h3>Pose: {currentPose}</h3>
-				{beginClassify && (
-					<h4>
-						Left: {poseTime.LEFT}, Right: {poseTime.RIGHT}, Up: {poseTime.UP}, Idle: {poseTime.IDLE}
-					</h4>
-				)}
-				{/* <h2>Distance: {poses && poses[0] && getEyeDistance()}</h2> */}
-				<div className="webcam">
-					<Webcam ref={webcamRef} width={640} height={480} />
-					<canvas ref={canvasRef} width={640} height={480} />
-				</div>
-			</div>
-			<footer></footer>
+					<Stack p={2} sx={{ height: 480 }}>
+						<Webcam ref={webcamRef} width={640} height={480} />
+						<canvas ref={canvasRef} width={640} height={480} />
+					</Stack>
+				</Container>
+			</Box>
 		</div>
 	);
 };
