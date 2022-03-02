@@ -22,7 +22,7 @@ import {
 } from "./utilities/drawPose";
 import { displayTime, getEyeDistance } from "./utilities/utilities";
 
-const poseEmoji = {
+const poseEmojis = {
 	LEFT: "⬅️",
 	RIGHT: "➡️",
 	UP: "⬆️",
@@ -32,29 +32,25 @@ const poseEmoji = {
 let beginClicked = false;
 let brain;
 let currentPose = "";
-let poseIsMatched = {};
-let poseIntervalID = {};
-let poseTime = {
-	LEFT: 0,
-	RIGHT: 0,
-	UP: 0,
-};
 let tooClose = false;
 
 const Stretch = () => {
-	const webcamRef = useRef(null);
 	const canvasRef = useRef(null);
+	const poseIntervalIDsRef = useRef({});
+	const webcamRef = useRef(null);
 
-	const [video, setVideo] = useState(null);
 	const [canvas, setCanvas] = useState(null);
 	const [ctx, setCtx] = useState(null);
 	const [modelLoaded, setModelLoaded] = useState(false);
 	const [poses, setPoses] = useState([]);
-	const [stretchComplete, setStretchComplete] = useState(false);
 
-	useEffect(() => {
-		if (webcamRef.current) setVideo(webcamRef.current.video);
-	}, [webcamRef]);
+	const [poseTimes, setPoseTimes] = useState({
+		LEFT: 0,
+		UP: 0,
+		RIGHT: 0,
+	});
+	const [stretchComplete, setStretchComplete] = useState(false);
+	const [video, setVideo] = useState(null);
 
 	useEffect(() => {
 		if (canvasRef.current) {
@@ -62,6 +58,18 @@ const Stretch = () => {
 			setCtx(canvasRef.current.getContext("2d"));
 		}
 	}, [canvasRef]);
+
+	useEffect(() => {
+		if (webcamRef.current) setVideo(webcamRef.current.video);
+	}, [webcamRef]);
+
+	useEffect(() => {
+		if (
+			poseTimes &&
+			Object.values(poseTimes).every((poseTime) => poseTime >= STRETCH_TIME)
+		)
+			setStretchComplete(true);
+	}, [poseTimes]);
 
 	//// POSENET ////
 
@@ -125,22 +133,25 @@ const Stretch = () => {
 	const gotResult = (error, results) => {
 		if (results && results[0].confidence > PREDICTION_CONFIDENCE) {
 			currentPose = results[0].label.toUpperCase();
-			if (!poseIsMatched[currentPose]) {
-				poseIsMatched[currentPose] = true;
-				poseTime[currentPose] = 0;
-				poseIntervalID[currentPose] = setInterval(() => {
-					if (poseTime[currentPose] < STRETCH_TIME) poseTime[currentPose] += 4;
-				}, 4);
+			if (!poseIntervalIDsRef.current[currentPose]) {
+				poseIntervalIDsRef.current[currentPose] = setInterval(() => {
+					// set timer for current pose
+					setPoseTimes((prevTimes) => {
+						if (prevTimes[currentPose] < STRETCH_TIME)
+							prevTimes[currentPose] += 4;
+						return prevTimes;
+					}, 4);
+				});
+				poseEmojis.keys().forEach((pose) => {
+					if (
+						pose !== currentPose &&
+						pose !== "IDLE" &&
+						poseIntervalIDsRef.current[pose]
+					) {
+						clearInterval(poseIntervalIDsRef.current[pose]);
+					}
+				});
 			}
-			if (
-				poseTime[currentPose] >= STRETCH_TIME &&
-				poseIntervalID[currentPose]
-			) {
-				clearInterval(poseIntervalID[currentPose]);
-				delete poseIntervalID[currentPose];
-			}
-			if (Object.values(poseTime).every((time) => time === STRETCH_TIME))
-				setStretchComplete(true);
 		}
 	};
 
@@ -232,7 +243,7 @@ const Stretch = () => {
 						<div>
 							{beginClicked ? (
 								<Typography variant="h6" color="text.primary">
-									Pose: {poseEmoji[currentPose]}
+									Pose: {poseEmojis[currentPose]}
 								</Typography>
 							) : (
 								<Typography variant="h6" color="text.primary">
@@ -240,8 +251,9 @@ const Stretch = () => {
 								</Typography>
 							)}
 							<Typography color="text.secondary">
-								Left: {displayTime(poseTime.LEFT)}, Up:{" "}
-								{displayTime(poseTime.UP)}, Right: {displayTime(poseTime.RIGHT)}
+								Left: {displayTime(poseTimes.LEFT)}, Up:{" "}
+								{displayTime(poseTimes["UP"])}, Right:{" "}
+								{displayTime(poseTimes["RIGHT"])}
 							</Typography>
 						</div>
 					) : (
